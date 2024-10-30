@@ -3,23 +3,23 @@ name: Tests
 on:
   push:
   pull_request:
-    branches: [ main ]
+    branches: [master]
 
 jobs:
   test:
-    name: redis ${{ matrix.redis-version }}
+    name: ${{ matrix.redis-version }}
     runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
       matrix:
         redis-version:
-          - 'redis:5'
-          - 'redis:6'
-          - 'redis:7.0'
-          - 'redis:7.2'
-          - 'redis:7.4'
-          - 'valkey/valkey:7.2'
-          - 'valkey/valkey:8'
+          - "redis:5"
+          - "redis:6"
+          - "redis:7.0"
+          - "redis:7.2"
+          - "redis:7.4"
+          - "valkey/valkey:7.2"
+          - "valkey/valkey:8"
 
     services:
       redis:
@@ -33,16 +33,16 @@ jobs:
           --health-retries 5
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: LizardByte/setup-python-action@master
-      with:
-        python-version: '2.7'
+      - name: Set up Python
+        uses: LizardByte/setup-python-action@master
+        with:
+          python-version: "2.7"
 
-    - name: Install dependencies
-      run: |
-        pip install -r requirements.txt
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
 
-    - name: Run tests
-      run: make test
+      - name: Run tests
+        run: make test
