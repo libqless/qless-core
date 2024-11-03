@@ -69,7 +69,7 @@ class TestFail(TestQless):
     def test_fail_waiting(self):
         """Only popped jobs can be failed"""
         self.lua("put", 0, "worker", "queue", "jid", "klass", {}, 0)
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             redis.ResponseError,
             r"waiting",
             self.lua,
@@ -89,7 +89,7 @@ class TestFail(TestQless):
         """Cannot fail a dependent job"""
         self.lua("put", 0, "worker", "queue", "a", "klass", {}, 0)
         self.lua("put", 0, "worker", "queue", "b", "klass", {}, 0, "depends", ["a"])
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             redis.ResponseError,
             r"depends",
             self.lua,
@@ -105,7 +105,7 @@ class TestFail(TestQless):
     def test_fail_scheduled(self):
         """Cannot fail a scheduled job"""
         self.lua("put", 0, "worker", "queue", "jid", "klass", {}, 1)
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             redis.ResponseError,
             r"scheduled",
             self.lua,
@@ -120,7 +120,7 @@ class TestFail(TestQless):
 
     def test_fail_nonexistent(self):
         """Cannot fail a job that doesn't exist"""
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             redis.ResponseError,
             r"does not exist",
             self.lua,
@@ -141,7 +141,7 @@ class TestFail(TestQless):
         self.lua("put", 0, "worker", "queue", "jid", "klass", {}, 0)
         self.lua("pop", 0, "queue", "worker", 10)
         self.lua("complete", 0, "jid", "worker", "queue", {})
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             redis.ResponseError,
             r"complete",
             self.lua,
@@ -160,7 +160,7 @@ class TestFail(TestQless):
         self.lua("pop", 1, "queue", "worker", 10)
         self.lua("put", 2, "worker", "queue", "jid", "klass", {}, 0)
         self.lua("pop", 3, "queue", "another-worker", 10)
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             redis.ResponseError,
             r"another worker",
             self.lua,
@@ -204,7 +204,7 @@ class TestFailed(TestQless):
 
     def test_failed_pagination(self):
         """Failed provides paginated access"""
-        jids = map(str, range(100))
+        jids = list(map(str, range(100)))
         for jid in jids:
             self.lua("put", jid, "worker", "queue", jid, "klass", {}, 0)
             self.lua("pop", jid, "queue", "worker", 10)

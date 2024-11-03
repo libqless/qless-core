@@ -55,7 +55,7 @@ class TestTrack(TestQless):
 
     def test_track_nonexistent(self):
         """Tracking nonexistent jobs raises an error"""
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             redis.ResponseError, r"does not exist", self.lua, "track", 0, "track", "jid"
         )
 

@@ -31,7 +31,7 @@ class TestLocks(TestQless):
         # Move the job after it's been popped
         self.lua("put", 3, "worker", "other", "jid", "klass", {}, 0)
         # Now this job cannot be heartbeated
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             redis.ResponseError,
             r"waiting",
             self.lua,
@@ -79,7 +79,7 @@ class TestLocks(TestQless):
             ],
         )
         # When we try to heartbeat, it should raise an exception
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             redis.ResponseError,
             r"given out to another",
             self.lua,
@@ -103,7 +103,7 @@ class TestLocks(TestQless):
     def test_heartbeat_waiting(self):
         """Only popped jobs can be heartbeated"""
         self.lua("put", 0, "worker", "queue", "jid", "klass", {}, 0)
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             redis.ResponseError,
             r"waiting",
             self.lua,
@@ -122,7 +122,7 @@ class TestLocks(TestQless):
         self.lua("put", 0, "worker", "queue", "jid", "klass", {}, 0)
         self.lua("pop", 0, "queue", "worker", 10)
         self.lua("fail", 0, "jid", "worker", "foo", "bar", {})
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             redis.ResponseError,
             r"failed",
             self.lua,
@@ -137,14 +137,14 @@ class TestLocks(TestQless):
         """Cannot heartbeat a dependent job"""
         self.lua("put", 0, "worker", "queue", "a", "klass", {}, 0)
         self.lua("put", 0, "worker", "queue", "b", "klass", {}, 0, "depends", ["a"])
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             redis.ResponseError, r"depends", self.lua, "heartbeat", 0, "b", "worker", {}
         )
 
     def test_heartbeat_scheduled(self):
         """Cannot heartbeat a scheduled job"""
         self.lua("put", 0, "worker", "queue", "jid", "klass", {}, 1)
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             redis.ResponseError,
             r"scheduled",
             self.lua,
@@ -157,7 +157,7 @@ class TestLocks(TestQless):
 
     def test_heartbeat_nonexistent(self):
         """Cannot heartbeat a job that doesn't exist"""
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             redis.ResponseError,
             r"does not exist",
             self.lua,
@@ -176,7 +176,7 @@ class TestLocks(TestQless):
         self.lua("put", 0, "worker", "queue", "jid", "klass", {}, 0)
         self.lua("pop", 0, "queue", "worker", 10)
         self.lua("complete", 0, "jid", "worker", "queue", {})
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             redis.ResponseError,
             r"complete",
             self.lua,
@@ -192,7 +192,7 @@ class TestLocks(TestQless):
         self.lua("put", 0, "worker", "queue", "jid", "klass", {}, 0)
         self.lua("pop", 1, "queue", "worker", 10)
         # Another worker can't heartbeat, but we can
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             redis.ResponseError,
             r"another worker",
             self.lua,
@@ -271,7 +271,7 @@ class TestRetry(TestQless):
     def test_retry_waiting(self):
         """Cannot retry a job that's waiting"""
         self.lua("put", 0, "worker", "queue", "jid", "klass", {}, 0)
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             redis.ResponseError,
             r"not currently running",
             self.lua,
@@ -288,7 +288,7 @@ class TestRetry(TestQless):
         self.lua("put", 0, "worker", "queue", "jid", "klass", {}, 0)
         self.lua("pop", 0, "queue", "worker", 10)
         self.lua("complete", 0, "jid", "worker", "queue", {})
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             redis.ResponseError,
             r"not currently running",
             self.lua,
@@ -305,7 +305,7 @@ class TestRetry(TestQless):
         self.lua("put", 0, "worker", "queue", "jid", "klass", {}, 0)
         self.lua("pop", 0, "queue", "worker", 10)
         self.lua("fail", 0, "jid", "worker", "group", "message", {})
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             redis.ResponseError,
             r"not currently running",
             self.lua,
@@ -321,7 +321,7 @@ class TestRetry(TestQless):
         """Cannot retry a job owned by another worker"""
         self.lua("put", 0, "worker", "queue", "jid", "klass", {}, 0)
         self.lua("pop", 0, "queue", "worker", 10)
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             redis.ResponseError,
             r"another worker",
             self.lua,
@@ -338,7 +338,7 @@ class TestRetry(TestQless):
         self.lua("put", 0, "worker", "queue", "jid", "klass", {}, 0)
         self.lua("pop", 0, "queue", "worker", 10)
         self.lua("retry", 0, "jid", "queue", "worker", 0)
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             redis.ResponseError,
             r"not currently running",
             self.lua,
@@ -355,7 +355,7 @@ class TestRetry(TestQless):
         self.lua("put", 0, "worker", "queue", "jid", "klass", {}, 0)
         self.lua("pop", 0, "queue", "worker", 10)
         self.lua("retry", 0, "jid", "queue", "worker", 0)
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             redis.ResponseError,
             r"not currently running",
             self.lua,
@@ -373,7 +373,7 @@ class TestRetry(TestQless):
         self.lua("put", 0, "worker", "queue", "jid", "klass", {}, 0)
         self.lua("pop", 0, "queue", "worker", 10)
         self.lua("retry", 0, "jid", "queue", "worker", 0)
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             redis.ResponseError,
             r"not currently running",
             self.lua,
@@ -386,7 +386,7 @@ class TestRetry(TestQless):
 
     def test_retry_nonexistent(self):
         """It's an error to retry a nonexistent job"""
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             redis.ResponseError,
             r"does not exist",
             self.lua,
@@ -449,7 +449,7 @@ class TestRetry(TestQless):
         self.lua("put", 0, "worker", "queue", "jid", "klass", {}, 0)
         self.lua("pop", 0, "queue", "worker", 10)
         self.lua("retry", 0, "jid", "queue", "worker", 0)
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             redis.ResponseError,
             r"not currently running",
             self.lua,
@@ -526,7 +526,7 @@ class TestGracePeriod(TestQless):
         """Grace periods should be given for each lock lost, not just first"""
         self.lua("put", 0, "worker", "queue", "jid", "klass", {}, 0, "retries", 20)
         job = self.lua("pop", 0, "queue", "worker", 10)[0]
-        for _ in xrange(10):
+        for _ in range(10):
             # Now, we'll lose the lock, but we should only get a warning, and
             # not actually have the job handed off to another yet
             expires = job["expires"] + 10

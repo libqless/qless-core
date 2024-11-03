@@ -112,7 +112,7 @@ class TestDependencies(TestQless):
         self.lua("put", 1, "worker", "queue", "b", "klass", {}, 0, "depends", ["a"])
         self.lua("put", 2, "worker", "queue", "c", "klass", {}, 0, "depends", ["b"])
         # Now, we'll only cancel part of this chain and see that it fails
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             redis.ResponseError, r"is a dependency", self.lua, "cancel", 3, "a", "b"
         )
 
@@ -134,7 +134,7 @@ class TestDependencies(TestQless):
 
     def test_multiple_dependency(self):
         """Unlock a job only after all dependencies have been met"""
-        jids = map(str, range(10))
+        jids = list(map(str, range(10)))
         for jid in jids:
             self.lua("put", jid, "worker", "queue", jid, "klass", {}, 0)
         # This job depends on all of the above
@@ -149,7 +149,7 @@ class TestDependencies(TestQless):
 
     def test_dependency_chain(self):
         """Test out successive unlocking of a dependency chain"""
-        jids = map(str, range(10))
+        jids = list(map(str, range(10)))
         self.lua("put", 0, "worker", "queue", 0, "klass", {}, 0)
         for jid, dep in zip(jids[1:], jids[:-1]):
             self.lua(
@@ -173,7 +173,7 @@ class TestDependencies(TestQless):
 
     def test_remove_dependency(self):
         """We can remove dependencies"""
-        jids = map(str, range(10))
+        jids = list(map(str, range(10)))
         for jid in jids:
             self.lua("put", jid, "worker", "queue", jid, "klass", {}, 0)
         # This job depends on all of the above
@@ -205,7 +205,7 @@ class TestDependencies(TestQless):
     def test_depends_waiting(self):
         """Cannot add or remove dependencies if the job is waiting"""
         self.lua("put", 0, "worker", "queue", "jid", "klass", {}, 0)
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             redis.ResponseError,
             r"in the depends state",
             self.lua,
@@ -215,7 +215,7 @@ class TestDependencies(TestQless):
             "on",
             "a",
         )
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             redis.ResponseError,
             r"in the depends state",
             self.lua,
@@ -229,7 +229,7 @@ class TestDependencies(TestQless):
     def test_depends_scheduled(self):
         """Cannot add or remove dependencies if the job is scheduled"""
         self.lua("put", 0, "worker", "queue", "jid", "klass", {}, 1)
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             redis.ResponseError,
             r"in the depends state",
             self.lua,
@@ -239,7 +239,7 @@ class TestDependencies(TestQless):
             "on",
             "a",
         )
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             redis.ResponseError,
             r"in the depends state",
             self.lua,
@@ -252,7 +252,7 @@ class TestDependencies(TestQless):
 
     def test_depends_nonexistent(self):
         """Cannot add or remove dependencies if the job doesn't exist"""
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             redis.ResponseError,
             r"in the depends state",
             self.lua,
@@ -262,7 +262,7 @@ class TestDependencies(TestQless):
             "on",
             "a",
         )
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             redis.ResponseError,
             r"in the depends state",
             self.lua,
@@ -278,7 +278,7 @@ class TestDependencies(TestQless):
         self.lua("put", 0, "worker", "queue", "jid", "klass", {}, 0)
         self.lua("pop", 0, "queue", "worker", 10)
         self.lua("fail", 1, "jid", "worker", "group", "message", {})
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             redis.ResponseError,
             r"in the depends state",
             self.lua,
@@ -288,7 +288,7 @@ class TestDependencies(TestQless):
             "on",
             "a",
         )
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             redis.ResponseError,
             r"in the depends state",
             self.lua,
@@ -303,7 +303,7 @@ class TestDependencies(TestQless):
         """Cannot add or remove dependencies if the job is running"""
         self.lua("put", 0, "worker", "queue", "jid", "klass", {}, 0)
         self.lua("pop", 0, "queue", "worker", 10)
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             redis.ResponseError,
             r"in the depends state",
             self.lua,
@@ -313,7 +313,7 @@ class TestDependencies(TestQless):
             "on",
             "a",
         )
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             redis.ResponseError,
             r"in the depends state",
             self.lua,

@@ -23,7 +23,7 @@ clean:
 	rm -rf qless.lua qless-lib.lua $(REDIS_TAR) $(REDIS_DIR)
 
 test: qless.lua *.lua
-	nosetests --exe -v
+	py.test
 
 $(REDIS_TAR):
 	curl -O http://download.redis.io/releases/$(REDIS_TAR)

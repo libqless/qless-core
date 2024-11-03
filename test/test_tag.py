@@ -131,10 +131,19 @@ class TestTag(TestQless):
         """Ensure that we can find the most common tags"""
         for tag in range(10):
             self.lua(
-                "put", 0, "worker", "queue", tag, "klass", {}, 0, "tags", range(tag, 10)
+                "put",
+                0,
+                "worker",
+                "queue",
+                tag,
+                "klass",
+                {},
+                0,
+                "tags",
+                list(range(tag, 10)),
             )
         self.assertEqual(
-            self.lua("tag", 0, "top", 0, 20), map(str, reversed(range(1, 10)))
+            self.lua("tag", 0, "top", 0, 20), list(map(str, reversed(range(1, 10))))
         )
 
     def test_recurring(self):
@@ -147,7 +156,7 @@ class TestTag(TestQless):
 
     def test_pagination_get(self):
         """Pagination should work for tag.get"""
-        jids = map(str, range(100))
+        jids = list(map(str, range(100)))
         for jid in jids:
             self.lua(
                 "put", jid, "worker", "queue", jid, "klass", {}, 0, "tags", ["foo"]
@@ -158,9 +167,9 @@ class TestTag(TestQless):
 
     def test_pagination_top(self):
         """Pagination should work for tag.top"""
-        jids = map(str, range(10))
+        jids = list(map(str, range(10)))
         for jid in jids:
-            for suffix in map(str, range(int(jid) + 5)):
+            for suffix in list(map(str, range(int(jid) + 5))):
                 self.lua(
                     "put",
                     jid,
