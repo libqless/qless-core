@@ -13,26 +13,9 @@ qless.lua: qless-lib.lua api.lua
 		egrep -v '^[[:space:]]*--[^\[]' | \
 		egrep -v '^--$$' >> qless.lua
 
-REDIS_VERSION ?= stable
-REDIS_DIR = redis-$(REDIS_VERSION)
-REDIS_TAR = redis-$(REDIS_VERSION).tar.gz
-REDIS_BIN = $(REDIS_DIR)/src/redis-server
-
-.PHONY: clean test redis
+.PHONY: clean test 
 clean:
-	rm -rf qless.lua qless-lib.lua $(REDIS_TAR) $(REDIS_DIR)
+	rm -rf qless.lua qless-lib.lua 
 
 test: qless.lua *.lua
 	py.test
-
-$(REDIS_TAR):
-	curl -O http://download.redis.io/releases/$(REDIS_TAR)
-
-$(REDIS_DIR): $(REDIS_TAR)
-	tar xvf $(REDIS_TAR)
-
-$(REDIS_BIN): $(REDIS_DIR)
-	cd $(REDIS_DIR) && make
-
-redis: $(REDIS_BIN)
-	$(REDIS_BIN) --daemonize yes
