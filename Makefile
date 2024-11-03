@@ -17,5 +17,5 @@ qless.lua: qless-lib.lua src/api.lua
 clean:
 	rm -rf qless.lua qless-lib.lua 
 
-test: qless.lua *.lua
+test: qless.lua
 	py.test
