@@ -1,0 +1,14 @@
+# frozen_string_literal: true
+
+# This file is generated. See https://github.com/libqless/qless-core/ruby
+
+require 'digest/sha1'
+
+# A wrapper that will give you `qless.lua` source to be used with your redis
+class QlessLua
+  SOURCE = <<-LUA_SOURCE.strip.freeze
+    <%= qless_lua_source %>
+  LUA_SOURCE
+
+  SOURCE_SHA = Digest::SHA1.hexdigest(SOURCE).freeze
+end

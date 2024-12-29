@@ -12,7 +12,7 @@ class QlessRecorder(object):
     def __init__(self, client):
         self._client = client
         self._pubsub = self._client.pubsub()
-        with open("qless.lua") as fin:
+        with open("dist/qless.lua") as fin:
             self._lua = self._client.register_script(fin.read())
         # Record any log messages that we've seen
         self.log = []

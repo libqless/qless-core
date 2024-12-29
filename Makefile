@@ -1,21 +1,27 @@
-all: qless.lua qless-lib.lua
+all: dist/qless.lua ruby
 
-qless-lib.lua: src/base.lua src/config.lua src/job.lua src/queue.lua src/recurring.lua src/worker.lua
-	echo "-- Current SHA: `git rev-parse HEAD`" > qless-lib.lua
-	echo "-- This is a generated file" >> qless-lib.lua
-	cat src/base.lua src/config.lua src/job.lua src/queue.lua src/recurring.lua src/worker.lua >> qless-lib.lua
+dist/qless-lib.lua: src/*.lua
+	cat src/base.lua \
+	    src/config.lua \
+		src/job.lua \
+		src/queue.lua \
+		src/recurring.lua \
+		src/worker.lua > dist/qless-lib.lua
 
-qless.lua: qless-lib.lua src/api.lua
-	# Cat these files out, but remove all the comments from the source
-	echo "-- Current SHA: `git rev-parse HEAD`" > qless.lua
-	echo "-- This is a generated file" >> qless.lua
-	cat qless-lib.lua src/api.lua | \
+dist/qless.lua: dist/qless-lib.lua src/api.lua
+	cat dist/qless-lib.lua src/api.lua | \
 		egrep -v '^[[:space:]]*--[^\[]' | \
-		egrep -v '^--$$' >> qless.lua
+		egrep -v '^--$$' > dist/qless.lua
 
-.PHONY: clean test 
+.PHONY: clean test ruby gem
 clean:
-	rm -rf qless.lua qless-lib.lua 
+	rm -rf dist/qless.lua dist/qless-lib.lua ruby/lib/qless_lua.rb
 
-test: qless.lua
+test: dist/qless.lua
 	py.test
+
+ruby: dist/qless.lua
+	./ruby/generate.rb > ruby/lib/qless_lua.rb
+
+gem: ruby
+	cd ruby && gem build qless_lua.gemspec

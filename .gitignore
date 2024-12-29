@@ -1,4 +1,3 @@
 *.pyc
+*.gem
 *~
-qless-lib.lua
-qless.lua

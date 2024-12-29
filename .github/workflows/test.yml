@@ -35,6 +35,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Build everything
+        run: make clean all
+
+      - name: Ensure latest built version are in the repo
+        run: git diff --exit-code
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
