@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |spec|
   spec.name          = 'qless_lua'
-  spec.version       = '1.0.0'
+  spec.version       = '1.1.0'
   spec.authors       = ['Anton Baklanov']
   spec.email         = ['antonbaklanov@gmail.com']
 
