@@ -22,8 +22,11 @@ jobs:
           - "redis:7.0"
           - "redis:7.2"
           - "redis:7.4"
+          - "redis:8.0"
+          - "redis:8.2"
           - "valkey/valkey:7.2"
-          - "valkey/valkey:8"
+          - "valkey/valkey:8.0"
+          - "valkey/valkey:8.1"
 
     services:
       redis:
