@@ -1,5 +1,7 @@
 """A large number of operations generate events. Let's test"""
 
+import json
+
 from common import TestQless
 
 
@@ -23,12 +25,19 @@ class TestEvents(TestQless):
         self.lua("track", 0, "track", "jid")
         with self.lua:
             self.lua("cancel", 0, "jid")
+        log = self.lua.log
+        log[0]["data"] = json.loads(log[0]["data"])
         self.assertEqual(
-            self.lua.log,
+            log,
             [
                 {
                     "channel": "ql:log",
-                    "data": '{"jid":"jid","queue":"queue","event":"canceled","worker":""}',
+                    "data": {
+                        "jid": "jid",
+                        "queue": "queue",
+                        "event": "canceled",
+                        "worker": "",
+                    },
                 },
                 {"channel": "ql:canceled", "data": "jid"},
             ],
@@ -41,13 +50,15 @@ class TestEvents(TestQless):
         self.lua("pop", 0, "queue", "worker", 10)
         with self.lua:
             self.lua("complete", 0, "jid", "worker", "queue", {})
+        log = self.lua.log
+        log[1]["data"] = json.loads(log[1]["data"])
         self.assertEqual(
-            self.lua.log,
+            log,
             [
                 {"channel": "ql:completed", "data": "jid"},
                 {
                     "channel": "ql:log",
-                    "data": '{"jid":"jid","event":"completed","queue":"queue"}',
+                    "data": {"jid": "jid", "event": "completed", "queue": "queue"},
                 },
             ],
         )
@@ -59,12 +70,20 @@ class TestEvents(TestQless):
         self.lua("pop", 0, "queue", "worker", 10)
         with self.lua:
             self.lua("fail", 0, "jid", "worker", "grp", "mess", {})
+        log = self.lua.log
+        log[0]["data"] = json.loads(log[0]["data"])
         self.assertEqual(
-            self.lua.log,
+            log,
             [
                 {
                     "channel": "ql:log",
-                    "data": '{"message":"mess","jid":"jid","group":"grp","event":"failed","worker":"worker"}',
+                    "data": {
+                        "message": "mess",
+                        "jid": "jid",
+                        "group": "grp",
+                        "event": "failed",
+                        "worker": "worker",
+                    },
                 },
                 {"channel": "ql:failed", "data": "jid"},
             ],
@@ -84,12 +103,14 @@ class TestEvents(TestQless):
         self.lua("track", 0, "track", "jid")
         with self.lua:
             self.lua("put", 0, "worker", "queue", "jid", "klass", {}, 0)
+        log = self.lua.log
+        log[0]["data"] = json.loads(log[0]["data"])
         self.assertEqual(
-            self.lua.log,
+            log,
             [
                 {
                     "channel": "ql:log",
-                    "data": '{"jid":"jid","event":"put","queue":"queue"}',
+                    "data": {"jid": "jid", "event": "put", "queue": "queue"},
                 },
                 {"channel": "ql:put", "data": "jid"},
             ],
@@ -103,17 +124,20 @@ class TestEvents(TestQless):
         print(self.lua("config.get", 0, "grace-period"))
         with self.lua:
             self.lua("pop", job["expires"] + 10, "queue", "worker", 10)
+        log = self.lua.log
+        log[1]["data"] = json.loads(log[1]["data"])
+        log[2]["data"] = json.loads(log[2]["data"])
         self.assertEqual(
-            self.lua.log,
+            log,
             [
                 {"channel": "ql:stalled", "data": "jid"},
                 {
                     "channel": "ql:w:worker",
-                    "data": '{"jid":"jid","event":"lock_lost","worker":"worker"}',
+                    "data": {"jid": "jid", "event": "lock_lost", "worker": "worker"},
                 },
                 {
                     "channel": "ql:log",
-                    "data": '{"jid":"jid","event":"lock_lost","worker":"worker"}',
+                    "data": {"jid": "jid", "event": "lock_lost", "worker": "worker"},
                 },
             ],
         )
@@ -128,20 +152,30 @@ class TestEvents(TestQless):
                 self.lua("pop", job["expires"] + 10, "queue", "worker", 10), {}
             )
         self.assertEqual(self.lua("get", 0, "jid")["state"], "failed")
+        log = self.lua.log
+        log[0]["data"] = json.loads(log[0]["data"])
+        log[1]["data"] = json.loads(log[1]["data"])
+        log[2]["data"] = json.loads(log[2]["data"])
         self.assertEqual(
-            self.lua.log,
+            log,
             [
                 {
                     "channel": "ql:w:worker",
-                    "data": '{"jid":"jid","event":"lock_lost","worker":"worker"}',
+                    "data": {"jid": "jid", "event": "lock_lost", "worker": "worker"},
                 },
                 {
                     "channel": "ql:log",
-                    "data": '{"jid":"jid","event":"lock_lost","worker":"worker"}',
+                    "data": {"jid": "jid", "event": "lock_lost", "worker": "worker"},
                 },
                 {
                     "channel": "ql:log",
-                    "data": '{"message":"Job exhausted retries in queue \\"queue\\"","jid":"jid","group":"failed-retries-queue","event":"failed","worker":"worker"}',
+                    "data": {
+                        "message": 'Job exhausted retries in queue "queue"',
+                        "jid": "jid",
+                        "group": "failed-retries-queue",
+                        "event": "failed",
+                        "worker": "worker",
+                    },
                 },
             ],
         )
@@ -166,12 +200,19 @@ class TestEvents(TestQless):
         self.lua("pop", 0, "queue", "worker", 10)
         with self.lua:
             self.lua("complete", 0, "jid", "worker", "queue", {}, "next", "queue")
+        log = self.lua.log
+        log[0]["data"] = json.loads(log[0]["data"])
         self.assertEqual(
-            self.lua.log,
+            log,
             [
                 {
                     "channel": "ql:log",
-                    "data": '{"jid":"jid","to":"queue","event":"advanced","queue":"queue"}',
+                    "data": {
+                        "jid": "jid",
+                        "to": "queue",
+                        "event": "advanced",
+                        "queue": "queue",
+                    },
                 }
             ],
         )
@@ -182,16 +223,19 @@ class TestEvents(TestQless):
         self.lua("pop", 0, "queue", "worker", 10)
         with self.lua:
             self.lua("timeout", 0, "jid")
+        log = self.lua.log
+        log[0]["data"] = json.loads(log[0]["data"])
+        log[1]["data"] = json.loads(log[1]["data"])
         self.assertEqual(
-            self.lua.log,
+            log,
             [
                 {
                     "channel": "ql:w:worker",
-                    "data": '{"jid":"jid","event":"lock_lost","worker":"worker"}',
+                    "data": {"jid": "jid", "event": "lock_lost", "worker": "worker"},
                 },
                 {
                     "channel": "ql:log",
-                    "data": '{"jid":"jid","event":"lock_lost","worker":"worker"}',
+                    "data": {"jid": "jid", "event": "lock_lost", "worker": "worker"},
                 },
             ],
         )
@@ -200,12 +244,14 @@ class TestEvents(TestQless):
         """We should hear chatter when a job is put into a queueu"""
         with self.lua:
             self.lua("put", 0, "worker", "queue", "jid", "klass", {}, 0)
+        log = self.lua.log
+        log[0]["data"] = json.loads(log[0]["data"])
         self.assertEqual(
-            self.lua.log,
+            log,
             [
                 {
                     "channel": "ql:log",
-                    "data": '{"jid":"jid","event":"put","queue":"queue"}',
+                    "data": {"jid": "jid", "event": "put", "queue": "queue"},
                 }
             ],
         )
@@ -216,20 +262,24 @@ class TestEvents(TestQless):
         self.lua("pop", 0, "queue", "worker", 10)
         with self.lua:
             self.lua("put", 0, "another", "another", "jid", "klass", {}, 10)
+        log = self.lua.log
+        log[0]["data"] = json.loads(log[0]["data"])
+        log[1]["data"] = json.loads(log[1]["data"])
+        log[2]["data"] = json.loads(log[2]["data"])
         self.assertEqual(
-            self.lua.log,
+            log,
             [
                 {
                     "channel": "ql:log",
-                    "data": '{"jid":"jid","event":"put","queue":"another"}',
+                    "data": {"jid": "jid", "event": "put", "queue": "another"},
                 },
                 {
                     "channel": "ql:w:worker",
-                    "data": '{"jid":"jid","event":"lock_lost","worker":"worker"}',
+                    "data": {"jid": "jid", "event": "lock_lost", "worker": "worker"},
                 },
                 {
                     "channel": "ql:log",
-                    "data": '{"jid":"jid","event":"lock_lost","worker":"worker"}',
+                    "data": {"jid": "jid", "event": "lock_lost", "worker": "worker"},
                 },
             ],
         )
@@ -238,12 +288,14 @@ class TestEvents(TestQless):
         """We should hear chatter about setting configurations"""
         with self.lua:
             self.lua("config.set", 0, "foo", "bar")
+        log = self.lua.log
+        log[0]["data"] = json.loads(log[0]["data"])
         self.assertEqual(
-            self.lua.log,
+            log,
             [
                 {
                     "channel": "ql:log",
-                    "data": '{"option":"foo","event":"config_set","value":"bar"}',
+                    "data": {"option": "foo", "event": "config_set", "value": "bar"},
                 }
             ],
         )
@@ -253,9 +305,16 @@ class TestEvents(TestQless):
         self.lua("config.set", 0, "foo", "bar")
         with self.lua:
             self.lua("config.unset", 0, "foo")
+        log = self.lua.log
+        log[0]["data"] = json.loads(log[0]["data"])
         self.assertEqual(
-            self.lua.log,
-            [{"channel": "ql:log", "data": '{"event":"config_unset","option":"foo"}'}],
+            log,
+            [
+                {
+                    "channel": "ql:log",
+                    "data": {"event": "config_unset", "option": "foo"},
+                }
+            ],
         )
 
     def test_cancel_waiting(self):
@@ -263,12 +322,19 @@ class TestEvents(TestQless):
         self.lua("put", 0, "worker", "queue", "jid", "klass", {}, 0)
         with self.lua:
             self.lua("cancel", 0, "jid")
+        log = self.lua.log
+        log[0]["data"] = json.loads(log[0]["data"])
         self.assertEqual(
-            self.lua.log,
+            log,
             [
                 {
                     "channel": "ql:log",
-                    "data": '{"jid":"jid","queue":"queue","event":"canceled","worker":""}',
+                    "data": {
+                        "jid": "jid",
+                        "queue": "queue",
+                        "event": "canceled",
+                        "worker": "",
+                    },
                 }
             ],
         )
@@ -279,16 +345,29 @@ class TestEvents(TestQless):
         self.lua("pop", 0, "q", "wrk", 10)
         with self.lua:
             self.lua("cancel", 0, "jid")
+        log = self.lua.log
+        log[0]["data"] = json.loads(log[0]["data"])
+        log[1]["data"] = json.loads(log[1]["data"])
         self.assertEqual(
-            self.lua.log,
+            log,
             [
                 {
                     "channel": "ql:log",
-                    "data": '{"jid":"jid","queue":"q","event":"canceled","worker":"wrk"}',
+                    "data": {
+                        "jid": "jid",
+                        "queue": "q",
+                        "event": "canceled",
+                        "worker": "wrk",
+                    },
                 },
                 {
                     "channel": "ql:w:wrk",
-                    "data": '{"jid":"jid","queue":"q","event":"canceled","worker":"wrk"}',
+                    "data": {
+                        "jid": "jid",
+                        "queue": "q",
+                        "event": "canceled",
+                        "worker": "wrk",
+                    },
                 },
             ],
         )
@@ -299,12 +378,19 @@ class TestEvents(TestQless):
         self.lua("put", 0, "worker", "queue", "b", "klass", {}, 0, "depends", ["a"])
         with self.lua:
             self.lua("cancel", 0, "b")
+        log = self.lua.log
+        log[0]["data"] = json.loads(log[0]["data"])
         self.assertEqual(
-            self.lua.log,
+            log,
             [
                 {
                     "channel": "ql:log",
-                    "data": '{"jid":"b","queue":"queue","event":"canceled","worker":""}',
+                    "data": {
+                        "jid": "b",
+                        "queue": "queue",
+                        "event": "canceled",
+                        "worker": "",
+                    },
                 }
             ],
         )
@@ -314,12 +400,19 @@ class TestEvents(TestQless):
         self.lua("put", 0, "worker", "queue", "jid", "klass", {}, 10)
         with self.lua:
             self.lua("cancel", 0, "jid")
+        log = self.lua.log
+        log[0]["data"] = json.loads(log[0]["data"])
         self.assertEqual(
-            self.lua.log,
+            log,
             [
                 {
                     "channel": "ql:log",
-                    "data": '{"jid":"jid","queue":"queue","event":"canceled","worker":""}',
+                    "data": {
+                        "jid": "jid",
+                        "queue": "queue",
+                        "event": "canceled",
+                        "worker": "",
+                    },
                 }
             ],
         )
@@ -331,12 +424,19 @@ class TestEvents(TestQless):
         self.lua("fail", 0, "jid", "worker", "group", "message", {})
         with self.lua:
             self.lua("cancel", 0, "jid")
+        log = self.lua.log
+        log[0]["data"] = json.loads(log[0]["data"])
         self.assertEqual(
-            self.lua.log,
+            log,
             [
                 {
                     "channel": "ql:log",
-                    "data": '{"jid":"jid","queue":"queue","event":"canceled","worker":""}',
+                    "data": {
+                        "jid": "jid",
+                        "queue": "queue",
+                        "event": "canceled",
+                        "worker": "",
+                    },
                 }
             ],
         )
@@ -348,12 +448,14 @@ class TestEvents(TestQless):
         with self.lua:
             # Put the job under the same worker who owns it now
             self.lua("put", 0, "worker", "queue", "jid", "klass", {}, 0)
+        log = self.lua.log
+        log[0]["data"] = json.loads(log[0]["data"])
         self.assertEqual(
-            self.lua.log,
+            log,
             [
                 {
                     "channel": "ql:log",
-                    "data": '{"jid":"jid","event":"put","queue":"queue"}',
+                    "data": {"jid": "jid", "event": "put", "queue": "queue"},
                 }
             ],
         )
