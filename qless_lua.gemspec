@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |spec|
   spec.name          = 'qless_lua'
-  spec.version       = '1.1.0'
+  spec.version       = '1.2.0'
   spec.authors       = ['Anton Baklanov']
   spec.email         = ['antonbaklanov@gmail.com']
 
@@ -12,11 +12,12 @@ Gem::Specification.new do |spec|
   spec.license       = 'MIT'
 
   spec.files = Dir[
-    'lib/*.rb',
+    'ruby/lib/*.rb',
+    'dist/*.lua',
     'qless_lua.gemspec',
   ]
 
-  spec.require_paths = ['lib']
+  spec.require_paths = ['ruby/lib']
 
   spec.required_ruby_version = '>= 2.7.0'
 end

@@ -1,4 +1,4 @@
-all: dist/qless.lua ruby
+all: dist/qless.lua
 
 dist/qless-lib.lua: src/*.lua
 	cat src/base.lua \
@@ -13,15 +13,12 @@ dist/qless.lua: dist/qless-lib.lua src/api.lua
 		egrep -v '^[[:space:]]*--[^\[]' | \
 		egrep -v '^--$$' > dist/qless.lua
 
-.PHONY: clean test ruby gem
+.PHONY: clean test gem
 clean:
-	rm -rf dist/qless.lua dist/qless-lib.lua ruby/lib/qless_lua.rb
+	rm -rf dist/qless.lua dist/qless-lib.lua
 
 test: dist/qless.lua
 	py.test
 
-ruby: dist/qless.lua
-	./ruby/generate.rb > ruby/lib/qless_lua.rb
-
-gem: ruby
-	cd ruby && gem build qless_lua.gemspec
+gem: dist/qless.lua
+	gem build qless_lua.gemspec
