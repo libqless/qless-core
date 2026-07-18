@@ -6,7 +6,9 @@ dist/qless-lib.lua: src/*.lua
 		src/job.lua \
 		src/queue.lua \
 		src/recurring.lua \
-		src/worker.lua > dist/qless-lib.lua
+		src/worker.lua | \
+		egrep -v '^[[:space:]]*--[^\[]' | \
+		egrep -v '^--$$' > dist/qless-lib.lua
 
 dist/qless.lua: dist/qless-lib.lua src/api.lua
 	cat dist/qless-lib.lua src/api.lua | \
