@@ -11,6 +11,11 @@ Gem::Specification.new do |spec|
   spec.homepage      = 'https://github.com/libqless/qless-core'
   spec.license       = 'MIT'
 
+  spec.metadata = {
+    'source_code_uri' => 'https://github.com/libqless/qless-core',
+    'changelog_uri'   => 'https://github.com/libqless/qless-core/blob/master/changes.md',
+  }
+
   spec.files = Dir[
     'ruby/lib/*.rb',
     'dist/*.lua',
